@@ -1,0 +1,29 @@
+{
+	"compilerOptions": {
+		"target": "ES2024",
+		"useDefineForClassFields": true,
+		"lib": ["ES2024", "DOM", "DOM.Iterable"],
+		"module": "ESNext",
+		"skipLibCheck": true,
+		"baseUrl": "./",
+		"paths": {
+			"#/*": ["./src/*"]
+		},
+		"noEmit": true,
+		"moduleResolution": "bundler",
+		"isolatedModules": true,
+		"moduleDetection": "force",
+		"jsx": "react-jsx",
+		"composite": true,
+		"strict": true,
+		"alwaysStrict": true,
+		"strictNullChecks": true,
+		"noUncheckedIndexedAccess": true,
+		"strictBuiltinIteratorReturn": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"noFallthroughCasesInSwitch": true,
+		"noUncheckedSideEffectImports": true
+	},
+	"include": ["src/**/*"]
+}
