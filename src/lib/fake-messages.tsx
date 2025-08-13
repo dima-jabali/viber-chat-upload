@@ -1,0 +1,275 @@
+import {
+	makeActionUuid,
+	makeISODateString,
+	makeMessageUuid,
+	MessageType,
+	type Message,
+} from "#/types/general";
+import { botUser, user } from "./fake-users";
+
+export const MISSING_LOYALTY_CARD_USER_MESSAGE_UUID = makeMessageUuid();
+export const MISSING_LOYALTY_CARD_BOT_MESSAGE_UUID = makeMessageUuid();
+export const ID_PARSING_CONFIRMATION_MESSAGE_UUID = makeMessageUuid();
+export const LOAN_AGREEMENT_CONSENT_MESSAGE_UUID = makeMessageUuid();
+export const ID_VERIFICATION_MATCH_MESSAGE_UUID = makeMessageUuid();
+export const APPROVAL_DISBURSEMENT_MESSAGE_UUID = makeMessageUuid();
+export const CONFIRM_BANK_INFO_BOT_MESSAGE_UUID = makeMessageUuid();
+export const UPLOAD_LOYALTY_CARD_MESSAGE_UUID = makeMessageUuid();
+export const COLLECT_BANK_INFO_MESSAGE_UUID = makeMessageUuid();
+export const SEND_BANK_INFO_MESSAGE_UUID = makeMessageUuid();
+export const CORRECT_NAME_MESSAGE_UUID = makeMessageUuid();
+export const UPLOAD_ID_MESSAGE_UUID = makeMessageUuid();
+export const BLURRY_ID_MESSAGE_UUID = makeMessageUuid();
+
+enum ThingToUpload {
+	PartnerMart = "PartnerMart loyalty card",
+	LoanAgreement = "loan agreement",
+	ID = "government ID",
+}
+
+const BASE_URL = "https://viber-chat-upload.vercel.app/?up=";
+
+function handleMakeLink(url: ThingToUpload) {
+	const link = `${BASE_URL}${encodeURI(url)}`;
+
+	return link;
+}
+
+export const ALL_MESSAGES: Record<string, Message> = {
+	[UPLOAD_ID_MESSAGE_UUID]: {
+		text: (
+			<p>
+				Please upload a clear photo of your government ID (front) on this link:{" "}
+				<a
+					href={handleMakeLink(ThingToUpload.ID)}
+					className="underline link font-bold"
+					target="_blank"
+				>
+					[Link to upload ID photo]
+				</a>
+				.
+			</p>
+		),
+		createdAt: makeISODateString(),
+		uuid: UPLOAD_ID_MESSAGE_UUID,
+		type: MessageType.TEXT,
+		createdBy: botUser,
+	},
+	[BLURRY_ID_MESSAGE_UUID]: {
+		text: (
+			<p>
+				Hmm, I couldn't read that clearly. Could you retake the photo?{" "}
+				<a
+					href={handleMakeLink(ThingToUpload.ID)}
+					className="underline link font-bold"
+					target="_blank"
+				>
+					[Link to upload ID photo]
+				</a>
+				.{`\n\nTip: Hold your phone steady and avoid glare.`}
+			</p>
+		),
+		createdAt: makeISODateString(),
+		uuid: BLURRY_ID_MESSAGE_UUID,
+		type: MessageType.TEXT,
+		createdBy: botUser,
+	},
+	[ID_PARSING_CONFIRMATION_MESSAGE_UUID]: {
+		actions: [
+			{
+				nextMessageUuid: ID_VERIFICATION_MATCH_MESSAGE_UUID,
+				uuid: makeActionUuid(),
+				text: "Yes, it is",
+			},
+			{
+				nextMessageUuid: CORRECT_NAME_MESSAGE_UUID,
+				uuid: makeActionUuid(),
+				text: "No, edit",
+			},
+		],
+		text: "📄 Got it! I see:\n\n\t• Name: Juan Dela Cruz\n\t• DOB: 05/15/1990\n\t• Address: 123 Mabini St., Manila\n\nIs this correct?",
+		uuid: ID_PARSING_CONFIRMATION_MESSAGE_UUID,
+		createdAt: makeISODateString(),
+		type: MessageType.BUTTONS,
+		createdBy: botUser,
+	},
+	[CORRECT_NAME_MESSAGE_UUID]: {
+		text: "Please type your full legal name exactly as it appears on your ID.",
+		uuid: CORRECT_NAME_MESSAGE_UUID,
+		createdAt: makeISODateString(),
+		type: MessageType.TEXT,
+		createdBy: botUser,
+	},
+	[ID_VERIFICATION_MATCH_MESSAGE_UUID]: {
+		text: (
+			<p>
+				Verifying your details…{"\n\n"}✅ Great news, Juan! You're pre-approved
+				for ₱50,000 at 1.5% monthly, payable in 12 months.{"\n\n"}Please upload
+				a photo of your PartnerMart loyalty card if you have it with you:{" "}
+				<a
+					href={handleMakeLink(ThingToUpload.PartnerMart)}
+					className="underline link font-bold"
+					target="_blank"
+				>
+					[Link to upload photo of PartnerMart loyalty card]
+				</a>
+				.
+			</p>
+		),
+		uuid: ID_VERIFICATION_MATCH_MESSAGE_UUID,
+		createdAt: makeISODateString(),
+		type: MessageType.TEXT,
+		createdBy: botUser,
+	},
+	[MISSING_LOYALTY_CARD_USER_MESSAGE_UUID]: {
+		uuid: MISSING_LOYALTY_CARD_USER_MESSAGE_UUID,
+		text: "I don't have it with me.",
+		createdAt: makeISODateString(),
+		type: MessageType.TEXT,
+		createdBy: user,
+	},
+	[MISSING_LOYALTY_CARD_BOT_MESSAGE_UUID]: {
+		text: "No problem! Please enter your loyalty ID number or mobile number registered with PartnerMart.",
+		uuid: MISSING_LOYALTY_CARD_BOT_MESSAGE_UUID,
+		createdAt: makeISODateString(),
+		type: MessageType.TEXT,
+		createdBy: botUser,
+	},
+	[COLLECT_BANK_INFO_MESSAGE_UUID]: {
+		text: "Alright. Now, please provide the following details to process your loan payout:\n\n\t• Full Name:\n\t• Account Number:\n\t• Bank Name:\n\t• Routing Number (ABA):",
+		uuid: COLLECT_BANK_INFO_MESSAGE_UUID,
+		createdAt: makeISODateString(),
+		type: MessageType.TEXT,
+		createdBy: botUser,
+	},
+	[SEND_BANK_INFO_MESSAGE_UUID]: {
+		text: "Full Name: Juan Dela Cruz\nAccount Number: 123456789\nBank Name: The Philippine Bank of Communications\nRouting Number (ABA): 987654321",
+		uuid: SEND_BANK_INFO_MESSAGE_UUID,
+		createdAt: makeISODateString(),
+		type: MessageType.TEXT,
+		createdBy: user,
+	},
+	[CONFIRM_BANK_INFO_BOT_MESSAGE_UUID]: {
+		actions: [
+			{
+				nextMessageUuid: LOAN_AGREEMENT_CONSENT_MESSAGE_UUID,
+				uuid: makeActionUuid(),
+				text: "Yes, it is",
+			},
+			{
+				nextMessageUuid: LOAN_AGREEMENT_CONSENT_MESSAGE_UUID,
+				uuid: makeActionUuid(),
+				text: "No, edit",
+			},
+		],
+		text: "📄 Got it! Your bank account informations are:\n\t• Full Name: Juan Dela Cruz\n\t• Account Number: 123456789\n\t• Bank Name: First National Bank\n\t• Routing Number (ABA): 987654321\n\nIs this correct?",
+		uuid: CONFIRM_BANK_INFO_BOT_MESSAGE_UUID,
+		createdAt: makeISODateString(),
+		type: MessageType.BUTTONS,
+		createdBy: botUser,
+	},
+	[LOAN_AGREEMENT_CONSENT_MESSAGE_UUID]: {
+		text: (
+			<p className="p-3">
+				Before we proceed with the payout, please review the loan agreement and
+				terms. You can find the document here:{" "}
+				<a
+					href={handleMakeLink(ThingToUpload.LoanAgreement)}
+					className="underline link font-bold"
+					target="_blank"
+				>
+					[Link to PDF]
+				</a>
+				{`\n\nBy clicking "I agree," you consent to the terms and conditions of the loan agreement.
+
+Here's a quick summary of the key points:
+
+• Loan Amount: ₱50,000
+• Interest Rate: 1.5% monthly
+• Repayment Period: 12 months
+• Monthly Payment: ₱4,584
+• Total Amount to Pay: ₱55,008`}
+			</p>
+		),
+		actions: [
+			{
+				nextMessageUuid: APPROVAL_DISBURSEMENT_MESSAGE_UUID,
+				uuid: makeActionUuid(),
+				text: "I agree",
+			},
+			{
+				nextMessageUuid: APPROVAL_DISBURSEMENT_MESSAGE_UUID,
+				text: "No, I don't agree",
+				uuid: makeActionUuid(),
+			},
+		],
+		uuid: LOAN_AGREEMENT_CONSENT_MESSAGE_UUID,
+		createdAt: makeISODateString(),
+		type: MessageType.BUTTONS,
+		createdBy: botUser,
+	} as const,
+	[APPROVAL_DISBURSEMENT_MESSAGE_UUID]: {
+		text: "Thank you for your confirmation.\n\nWe have received your approval and are now processing the loan payout to your account. You will receive a notification once the funds have been successfully disbursed.\n\nYou can Track your [loan status here] at any time.\n\nIf you have any questions, just type HELP or contact our customer support.",
+		uuid: APPROVAL_DISBURSEMENT_MESSAGE_UUID,
+		createdAt: makeISODateString(),
+		type: MessageType.TEXT,
+		createdBy: botUser,
+	} as const,
+};
+
+export const CONVERSATION_FLOW = {
+	[UPLOAD_ID_MESSAGE_UUID]: {
+		userResponse: null,
+		botResponse: BLURRY_ID_MESSAGE_UUID,
+		delay: 1500,
+	},
+	[BLURRY_ID_MESSAGE_UUID]: {
+		userResponse: null,
+		botResponse: ID_PARSING_CONFIRMATION_MESSAGE_UUID,
+		delay: 1500,
+	},
+	[CORRECT_NAME_MESSAGE_UUID]: {
+		userResponse: "text-input",
+		botResponse: ID_PARSING_CONFIRMATION_MESSAGE_UUID,
+		delay: 1500,
+	},
+	[ID_VERIFICATION_MATCH_MESSAGE_UUID]: {
+		userResponse: MISSING_LOYALTY_CARD_USER_MESSAGE_UUID,
+		botResponse: MISSING_LOYALTY_CARD_BOT_MESSAGE_UUID,
+		delay: 1500,
+	},
+	[MISSING_LOYALTY_CARD_BOT_MESSAGE_UUID]: {
+		userResponse: "text-input-loyalty-card",
+		botResponse: COLLECT_BANK_INFO_MESSAGE_UUID,
+		delay: 1500,
+	},
+	[COLLECT_BANK_INFO_MESSAGE_UUID]: {
+		userResponse: SEND_BANK_INFO_MESSAGE_UUID,
+		botResponse: CONFIRM_BANK_INFO_BOT_MESSAGE_UUID,
+		delay: 1500,
+	},
+};
+
+export const FAKE_WORKFLOW_INITIAL_MESSAGES: Array<Message> = [
+	{
+		text: "Hi! 👋 You've received a special loan offer from PartnerMart. I'll just verify your identity so we can check your eligibility. By continuing, you agree we'll process your information to confirm your identity and prepare your loan agreement.",
+		createdAt: makeISODateString(),
+		uuid: makeMessageUuid(),
+		type: MessageType.TEXT,
+		createdBy: botUser,
+	},
+	{
+		actions: [
+			{
+				nextMessageUuid: UPLOAD_ID_MESSAGE_UUID,
+				uuid: makeActionUuid(),
+				text: "Continue",
+			},
+		],
+		createdAt: makeISODateString(),
+		type: MessageType.BUTTONS,
+		uuid: makeMessageUuid(),
+		createdBy: botUser,
+		text: "",
+	},
+];

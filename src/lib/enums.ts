@@ -1,5 +1,6 @@
-export enum ThingToUpload {
-	PartnerMart = "PartnerMart loyalty card",
-	LoanAgreement = "loan agreement",
-	ID = "government ID",
+export enum Route {
+	LoanAgreement = "Loan Agreement",
+	PartnerMart = "PartnerMart",
+	ID = "government id",
+	ChatApp = "chat-app",
 }

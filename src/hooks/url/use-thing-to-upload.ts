@@ -1,4 +1,3 @@
-import { ThingToUpload } from "#/lib/enums";
 import {
 	createParser,
 	parseAsString,
@@ -6,22 +5,24 @@ import {
 	type ParserBuilder,
 } from "nuqs";
 
-const THING_TO_UPLOAD_ID_KEY = "up";
+import { Route } from "#/lib/enums";
 
-const parseAsThingToUpload: ParserBuilder<ThingToUpload> = createParser({
+const ROUTE_ID_KEY = "r";
+
+const parseAsRoute: ParserBuilder<Route> = createParser({
 	serialize: (value) => `${value}`,
 
 	parse: (value) => {
 		if (!value) return null;
 
-		return parseAsString.parse(value) as ThingToUpload;
+		return parseAsString.parse(value) as Route;
 	},
 });
 
-export const useThingToUpload = () =>
+export const useRoute = () =>
 	useQueryState(
-		THING_TO_UPLOAD_ID_KEY,
-		parseAsThingToUpload.withDefault(ThingToUpload.ID).withOptions({
+		ROUTE_ID_KEY,
+		parseAsRoute.withDefault(Route.ID).withOptions({
 			clearOnDefault: false,
 			history: "push",
 			shallow: true,
