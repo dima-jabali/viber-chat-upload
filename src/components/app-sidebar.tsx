@@ -11,8 +11,9 @@ import {
 	SidebarMenu,
 	SidebarRail,
 } from "#/components/ui/sidebar";
+import { useGetChats } from "#/hooks/get/chat";
+import { EmptyFallbackSuspense } from "./empty-fallback-suspense";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { botUser } from "#/lib/fake-users";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	return (
@@ -57,28 +58,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
 					<SidebarGroupContent>
 						<SidebarMenu>
-							<button
-								className="button-hover flex items-center gap-2 py-2 rounded-lg bg-accent/15 px-2"
-								type="button"
-							>
-								<Avatar className="size-10">
-									<AvatarImage src={botUser.image} alt="@shadcn" />
-
-									<AvatarFallback>CN</AvatarFallback>
-								</Avatar>
-
-								<div className="flex flex-col items-start gap-0 w-full">
-									<div className="w-full flex items-center justify-between">
-										<span>LOAN</span>
-
-										<span className="text-muted-foreground text-xs opacity-70">
-											09:26
-										</span>
-									</div>
-
-									<p className="text-muted-foreground text-xs">Loan</p>
-								</div>
-							</button>
+							<EmptyFallbackSuspense>
+								<Chats />
+							</EmptyFallbackSuspense>
 						</SidebarMenu>
 					</SidebarGroupContent>
 				</SidebarGroup>
@@ -86,4 +68,34 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 			<SidebarRail />
 		</Sidebar>
 	);
+}
+
+function Chats() {
+	const chats = useGetChats();
+
+	return chats.data.map((chat) => (
+		<button
+			className="button-hover flex items-center gap-2 py-2 rounded-lg bg-accent/15 px-2"
+			key={chat.uuid}
+			type="button"
+		>
+			<Avatar className="size-10">
+				<AvatarImage src={chat.createdBy.image} alt={chat.createdBy.name} />
+
+				<AvatarFallback>CN</AvatarFallback>
+			</Avatar>
+
+			<div className="flex flex-col items-start gap-0 w-full">
+				<div className="w-full flex items-center justify-between">
+					<p className="text-start">{chat.title}</p>
+
+					<span className="text-muted-foreground text-xs opacity-70">
+						09:26
+					</span>
+				</div>
+
+				<p className="text-muted-foreground text-xs">{chat.description}</p>
+			</div>
+		</button>
+	));
 }

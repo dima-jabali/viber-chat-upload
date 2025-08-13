@@ -1,15 +1,16 @@
 import { ChevronLeft, ChevronRight, Settings } from "lucide-react";
 
 import { AppSidebar } from "#/components/app-sidebar";
+import { EmptyFallbackSuspense } from "#/components/empty-fallback-suspense";
+import { MessageInput } from "#/components/message-input";
+import { Messages } from "#/components/messages";
+import { Avatar, AvatarFallback, AvatarImage } from "#/components/ui/avatar";
 import { Separator } from "#/components/ui/separator";
 import { SidebarInset, SidebarProvider } from "#/components/ui/sidebar";
-import { Avatar, AvatarFallback, AvatarImage } from "#/components/ui/avatar";
-import { MessageInput } from "#/components/message-input";
 import { WithChatUuid } from "#/components/with-chat-uuid";
-import { Messages } from "#/components/messages";
-import { EmptyFallbackSuspense } from "#/components/empty-fallback-suspense";
-import { botUser } from "#/lib/fake-users";
 import { useGlobalStore } from "#/contexts/global-store";
+import { useChat } from "#/hooks/get/chat";
+import { useWithChatUuid } from "#/hooks/url/use-chat-uuid";
 import { api } from "#/lib/api";
 
 export function ChatApp() {
@@ -58,28 +59,37 @@ export function ChatApp() {
 
 				<EmptyFallbackSuspense>
 					<WithChatUuid>
-						<section className="flex h-full w-full flex-col gap-0">
-							<div className="flex items-center justify-between px-3 py-2.5 border-b border-border">
-								<div className="flex items-center gap-2">
-									<Avatar className="size-10">
-										<AvatarImage src={botUser.image} alt="@shadcn" />
-
-										<AvatarFallback>CN</AvatarFallback>
-									</Avatar>
-
-									<div className="flex flex-col items-start gap-0 w-full justify-start">
-										<span>LOAN</span>
-									</div>
-								</div>
-							</div>
-
-							<Messages />
-
-							<MessageInput />
-						</section>
+						<Chat />
 					</WithChatUuid>
 				</EmptyFallbackSuspense>
 			</SidebarInset>
 		</SidebarProvider>
 	);
+}
+
+function Chat() {
+	const chatUuid = useWithChatUuid();
+	const chat = useChat(chatUuid);
+
+	return chat ? (
+		<section className="flex h-full w-full flex-col gap-0">
+			<div className="flex items-center justify-between px-3 py-2.5 border-b border-border">
+				<div className="flex items-center gap-2">
+					<Avatar className="size-10">
+						<AvatarImage src={chat.createdBy.image} alt={chat.createdBy.name} />
+
+						<AvatarFallback>CN</AvatarFallback>
+					</Avatar>
+
+					<div className="flex flex-col items-start gap-0 w-full justify-start">
+						<span>{chat.title}</span>
+					</div>
+				</div>
+			</div>
+
+			<Messages />
+
+			<MessageInput />
+		</section>
+	) : null;
 }
