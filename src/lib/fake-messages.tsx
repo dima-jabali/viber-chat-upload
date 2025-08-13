@@ -5,6 +5,7 @@ import {
 	MessageType,
 	type Message,
 } from "#/types/general";
+import { Route } from "./enums";
 import { botUser, user } from "./fake-users";
 
 export const MISSING_LOYALTY_CARD_USER_MESSAGE_UUID = makeMessageUuid();
@@ -21,15 +22,9 @@ export const CORRECT_NAME_MESSAGE_UUID = makeMessageUuid();
 export const UPLOAD_ID_MESSAGE_UUID = makeMessageUuid();
 export const BLURRY_ID_MESSAGE_UUID = makeMessageUuid();
 
-enum ThingToUpload {
-	PartnerMart = "PartnerMart loyalty card",
-	LoanAgreement = "loan agreement",
-	ID = "government ID",
-}
+const BASE_URL = "https://viber-chat-upload.vercel.app/?r=";
 
-const BASE_URL = "https://viber-chat-upload.vercel.app/?up=";
-
-function handleMakeLink(url: ThingToUpload) {
+function handleMakeLink(url: Route) {
 	const link = `${BASE_URL}${encodeURI(url)}`;
 
 	return link;
@@ -41,7 +36,7 @@ export const ALL_MESSAGES: Record<string, Message> = {
 			<p>
 				Please upload a clear photo of your government ID (front) on this link:{" "}
 				<a
-					href={handleMakeLink(ThingToUpload.ID)}
+					href={handleMakeLink(Route.ID)}
 					className="underline link font-bold"
 					target="_blank"
 				>
@@ -60,7 +55,7 @@ export const ALL_MESSAGES: Record<string, Message> = {
 			<p>
 				Hmm, I couldn't read that clearly. Could you retake the photo?{" "}
 				<a
-					href={handleMakeLink(ThingToUpload.ID)}
+					href={handleMakeLink(Route.ID)}
 					className="underline link font-bold"
 					target="_blank"
 				>
@@ -107,7 +102,7 @@ export const ALL_MESSAGES: Record<string, Message> = {
 				for ₱50,000 at 1.5% monthly, payable in 12 months.{"\n\n"}Please upload
 				a photo of your PartnerMart loyalty card if you have it with you:{" "}
 				<a
-					href={handleMakeLink(ThingToUpload.PartnerMart)}
+					href={handleMakeLink(Route.PartnerMart)}
 					className="underline link font-bold"
 					target="_blank"
 				>
@@ -174,7 +169,7 @@ export const ALL_MESSAGES: Record<string, Message> = {
 				Before we proceed with the payout, please review the loan agreement and
 				terms. You can find the document here:{" "}
 				<a
-					href={handleMakeLink(ThingToUpload.LoanAgreement)}
+					href={handleMakeLink(Route.LoanAgreement)}
 					className="underline link font-bold"
 					target="_blank"
 				>
