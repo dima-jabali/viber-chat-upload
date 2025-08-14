@@ -9,9 +9,10 @@ export function App() {
 
 	switch (route) {
 		case Route.PartnerMartNumber:
+		case Route.ID_SecondTime:
+		case Route.ID_FirstTime:
 		case Route.PartnerMart:
 		case Route.LoanPayout:
-		case Route.ID:
 			return <UploadIds />;
 
 		case Route.LoanAgreement:

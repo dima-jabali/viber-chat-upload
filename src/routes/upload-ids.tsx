@@ -1,4 +1,4 @@
-import { Check, Loader, Loader2, Upload, XCircle } from "lucide-react";
+import { Check, Loader, Loader2, Upload, X, XCircle } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { useRoute } from "#/hooks/url/use-thing-to-upload";
@@ -7,7 +7,7 @@ import { Input } from "#/components/ui/input";
 import { Route } from "#/lib/enums";
 
 const INPUTS = {
-	[Route.ID]: [
+	[Route.ID_SecondTime]: [
 		{
 			label: "Full Name",
 			value: "Juan Dela Cruz",
@@ -44,15 +44,15 @@ const INPUTS = {
 			label: "PartnerMart loyalty card number",
 			value: "",
 		},
-	]
+	],
 };
 
 export function UploadIds() {
 	const [route] = useRoute();
 
 	const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+	const [inputs, setInputs] = useState(INPUTS[Route.ID_SecondTime]);
 	const [isConfirming, setIsConfirming] = useState(false);
-	const [inputs, setInputs] = useState(INPUTS[Route.ID]);
 	const [file, setFile] = useState<File | null>(null);
 	const [uploadStatus, setUploadStatus] = useState<
 		"idle" | "uploading" | "success" | "error" | "validating" | "confirmed"
@@ -71,15 +71,13 @@ export function UploadIds() {
 	}, [previewUrl]);
 
 	useEffect(() => {
-
 		// @ts-expect-error => ignore
 		const input = INPUTS[route];
-		
-		if (input) {
 
+		if (input) {
 			setInputs(input);
 		} else {
-			setInputs([])
+			setInputs([]);
 		}
 	}, [route]);
 
@@ -160,18 +158,22 @@ export function UploadIds() {
 		}
 	};
 
-	console.log({route, uploadStatus});
+	console.log({ route, uploadStatus });
 
 	return (
 		<div
 			className="h-screen w-screen bg-gray-100 dark:bg-gray-900 grid lg:grid-cols-2 grid-cols-1 place-items-center items-center justify-center p-4 data-[one-col=true]:grid-cols-1"
 			data-one-col={
-				(uploadStatus === "idle" || route === Route.LoanPayout || route === Route.PartnerMartNumber || route === Route.PartnerMart)
+				uploadStatus === "idle" ||
+				route === Route.LoanPayout ||
+				route === Route.PartnerMartNumber ||
+				route === Route.PartnerMart
 			}
 		>
 			<title>Upload</title>
 
-			{route === Route.LoanPayout || route === Route.PartnerMartNumber  ? null : (
+			{route === Route.LoanPayout ||
+			route === Route.PartnerMartNumber ? null : (
 				<div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl max-w-lg w-full flex flex-col items-center gap-6">
 					<h1 className="text-2xl font-bold text-gray-800 dark:text-white text-center">
 						Upload your <i className="underline">{route}</i> photo
@@ -250,7 +252,7 @@ export function UploadIds() {
 
 			{uploadStatus === "idle" &&
 			route !== Route.LoanPayout &&
-			 route !== Route.PartnerMartNumber  ? null : (
+			route !== Route.PartnerMartNumber ? null : (
 				<div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl max-w-lg w-full flex flex-col gap-6">
 					{uploadStatus === "confirmed" ? (
 						<>
@@ -258,10 +260,22 @@ export function UploadIds() {
 								You've validated your information
 							</h2>
 
-							<div className="flex gap-2 items-center text-green-700">
+							<div className="flex gap-2 items-center justify-center text-green-700">
 								<Check className="size-5" />
 
 								<p>You can close this page and return to the chat.</p>
+							</div>
+						</>
+					) : uploadStatus === "success" && route === Route.ID_FirstTime ? (
+						<>
+							<h2 className="text-xl font-bold text-gray-800 dark:text-white text-center">
+								Couldn't read your information!
+							</h2>
+
+							<div className="flex gap-2 items-center justify-center text-destructive text-sm">
+								<X className="size-5" />
+
+								<p>Please, close this page and return to the chat.</p>
 							</div>
 						</>
 					) : uploadStatus === "success" || route === Route.LoanPayout ? (
@@ -274,9 +288,15 @@ export function UploadIds() {
 							<div className="whitespace-pre-wrap">
 								{inputs.map((input) => (
 									<fieldset key={input.label}>
-										<label className="text-xs" htmlFor={input.label}>{input.label}</label>
+										<label className="text-xs" htmlFor={input.label}>
+											{input.label}
+										</label>
 
-										<Input type="text" defaultValue={input.value} id={input.label} />
+										<Input
+											type="text"
+											defaultValue={input.value}
+											id={input.label}
+										/>
 									</fieldset>
 								))}
 							</div>
@@ -305,7 +325,7 @@ export function UploadIds() {
 								Parsing photo...
 							</h2>
 						</>
-					) : uploadStatus === "idle"  ? (
+					) : uploadStatus === "idle" ? (
 						<>
 							<h2 className="text- font-bold text-gray-800 dark:text-white text-center">
 								Enter your loyalty ID number or mobile number registered with
@@ -313,12 +333,18 @@ export function UploadIds() {
 							</h2>
 
 							{inputs.map((input) => (
-									<fieldset key={input.label}>
-										<label className="text-xs" htmlFor={input.label}>{input.label}</label>
+								<fieldset key={input.label}>
+									<label className="text-xs" htmlFor={input.label}>
+										{input.label}
+									</label>
 
-										<Input type="text" defaultValue={input.value} id={input.label} />
-									</fieldset>
-								))}
+									<Input
+										type="text"
+										defaultValue={input.value}
+										id={input.label}
+									/>
+								</fieldset>
+							))}
 
 							<Button onClick={handleSubmitLoyaltyId}>
 								{isConfirming ? <Loader className="animate-spin" /> : null}

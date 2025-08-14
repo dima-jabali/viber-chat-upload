@@ -13,6 +13,7 @@ export const BOT_DONT_HAVE_LOYALTY_CARD_MESSAGE_UUID = makeMessageUuid();
 export const LOAN_AGREEMENT_CONSENT_MESSAGE_UUID = makeMessageUuid();
 export const ID_VERIFICATION_MATCH_MESSAGE_UUID = makeMessageUuid();
 export const APPROVAL_DISBURSEMENT_MESSAGE_UUID = makeMessageUuid();
+export const COULDNT_RECOGNIZE_ID_MESSAGE_UUID = makeMessageUuid();
 export const UPLOAD_LOYALTY_CARD_MESSAGE_UUID = makeMessageUuid();
 export const COLLECT_BANK_INFO_MESSAGE_UUID = makeMessageUuid();
 export const UPLOAD_ID_MESSAGE_UUID = makeMessageUuid();
@@ -34,7 +35,7 @@ export const ALL_MESSAGES: Record<string, Message> = {
 			<p>
 				Please upload a clear photo of your government ID (front) on this link:{" "}
 				<a
-					href={handleMakeLink(Route.ID)}
+					href={handleMakeLink(Route.ID_FirstTime)}
 					className="underline link font-bold"
 					rel="noopener noreferrer"
 					target="_blank"
@@ -46,6 +47,27 @@ export const ALL_MESSAGES: Record<string, Message> = {
 		),
 		createdAt: makeISODateString(),
 		uuid: UPLOAD_ID_MESSAGE_UUID,
+		type: MessageType.TEXT,
+		createdBy: botUser,
+	},
+	[COULDNT_RECOGNIZE_ID_MESSAGE_UUID]: {
+		text: (
+			<p>
+				Couldn't recongnize the ID photo, please upload another photo{" "}
+				<a
+					href={handleMakeLink(Route.ID_SecondTime)}
+					className="underline link font-bold"
+					rel="noopener noreferrer"
+					target="_blank"
+				>
+					[here]
+				</a>
+				!{"\n\n"}
+				Tip: make sure the picture is not blurry.
+			</p>
+		),
+		createdAt: makeISODateString(),
+		uuid: COULDNT_RECOGNIZE_ID_MESSAGE_UUID,
 		type: MessageType.TEXT,
 		createdBy: botUser,
 	},
@@ -81,7 +103,7 @@ export const ALL_MESSAGES: Record<string, Message> = {
 	[BOT_DONT_HAVE_LOYALTY_CARD_MESSAGE_UUID]: {
 		text: (
 			<p>
-				Got it, you don't have a PartnerMart loyalty card with you.{'\n\n'}
+				Got it, you don't have a PartnerMart loyalty card with you.{"\n\n"}
 				In that case, please enter your PartnerMart loyalty card number:
 				<a
 					href={handleMakeLink(Route.PartnerMartNumber)}
@@ -175,6 +197,11 @@ Here's a quick summary of the key points:
 
 export const CONVERSATION_FLOW = {
 	[UPLOAD_ID_MESSAGE_UUID]: {
+		botResponse: COULDNT_RECOGNIZE_ID_MESSAGE_UUID,
+		userResponse: null,
+		delay: 1500,
+	},
+	[COULDNT_RECOGNIZE_ID_MESSAGE_UUID]: {
 		botResponse: ID_VERIFICATION_MATCH_MESSAGE_UUID,
 		userResponse: null,
 		delay: 1500,
