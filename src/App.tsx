@@ -8,7 +8,9 @@ export function App() {
 	const [route] = useRoute();
 
 	switch (route) {
+		case Route.PartnerMartNumber:
 		case Route.PartnerMart:
+		case Route.LoanPayout:
 		case Route.ID:
 			return <UploadIds />;
 

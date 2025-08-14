@@ -54,7 +54,6 @@ export function MessageInput_() {
 
 		if (lastMessage && CONVERSATION_FLOW[lastMessage.uuid]) {
 			const flow = CONVERSATION_FLOW[lastMessage.uuid];
-			let userMessageText = "";
 
 			if (!flow) {
 				console.error("No flow found for message:", {
@@ -65,11 +64,7 @@ export function MessageInput_() {
 				return;
 			}
 
-			if (flow.userResponse === "text-input") {
-				userMessageText = inputRef.current;
-			} else if (flow.userResponse === "text-input-loyalty-card") {
-				userMessageText = "1234567890"; // Mocking the loyalty card number
-			} else if (flow.userResponse) {
+			if (flow.userResponse) {
 				// Find the full message object from our mock database
 				const userMsg = ALL_MESSAGES[flow.userResponse];
 
@@ -86,30 +81,21 @@ export function MessageInput_() {
 				}
 			}
 
-			// Add user-typed message if it's a 'text-input' flow
-			if (userMessageText) {
-				addMessageToChat(chatUuid, {
-					createdAt: makeISODateString(),
-					uuid: makeMessageUuid(),
-					type: MessageType.TEXT,
-					text: userMessageText,
-					createdBy: user,
-				});
-			}
-
 			// Add the bot's response after a delay
-			setTimeout(() => {
-				const botMsg = ALL_MESSAGES[flow.botResponse];
+			if (flow.botResponse) {
+				setTimeout(() => {
+					const botMsg = ALL_MESSAGES[flow.botResponse];
 
-				if (botMsg) {
-					addMessageToChat(chatUuid, {
-						...botMsg,
-						createdAt: makeISODateString(),
-					});
-				} else {
-					console.error("Bot message not found:", { flow, ALL_MESSAGES });
-				}
-			}, flow.delay);
+					if (botMsg) {
+						addMessageToChat(chatUuid, {
+							...botMsg,
+							createdAt: makeISODateString(),
+						});
+					} else {
+						console.error("Bot message not found:", { flow, ALL_MESSAGES });
+					}
+				}, flow.delay);
+			}
 		} else {
 			// Default case: just send the user's message
 			const text = inputRef.current;
