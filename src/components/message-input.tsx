@@ -14,6 +14,7 @@ import {
 	makeISODateString,
 	makeMessageUuid,
 	MessageType,
+	type MessageUuid,
 } from "#/types/general";
 
 export function MessageInput() {
@@ -64,9 +65,15 @@ export function MessageInput_() {
 				return;
 			}
 
-			if (flow.userResponse) {
+			let userMessageText = "";
+
+			if (flow.userResponse === "text-input") {
+				userMessageText = inputRef.current;
+			} else if (flow.userResponse === "text-input-loyalty-card") {
+				userMessageText = "1234567890"; // Mocking the loyalty card number
+			} else if (flow.userResponse) {
 				// Find the full message object from our mock database
-				const userMsg = ALL_MESSAGES[flow.userResponse];
+				const userMsg = ALL_MESSAGES[flow.userResponse as MessageUuid];
 
 				if (userMsg) {
 					addMessageToChat(chatUuid, {
@@ -79,6 +86,17 @@ export function MessageInput_() {
 						flow,
 					});
 				}
+			}
+
+			// Add user-typed message if it's a 'text-input' flow
+			if (userMessageText) {
+				addMessageToChat(chatUuid, {
+					createdAt: makeISODateString(),
+					uuid: makeMessageUuid(),
+					type: MessageType.TEXT,
+					text: userMessageText,
+					createdBy: user,
+				});
 			}
 
 			// Add the bot's response after a delay
