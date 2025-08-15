@@ -22,7 +22,7 @@ const parseAsRoute: ParserBuilder<Route> = createParser({
 export const useRoute = () =>
 	useQueryState(
 		ROUTE_ID_KEY,
-		parseAsRoute.withDefault(Route.ID_FirstTime).withOptions({
+		parseAsRoute.withDefault(Route.ChatApp).withOptions({
 			clearOnDefault: false,
 			history: "push",
 			shallow: true,
