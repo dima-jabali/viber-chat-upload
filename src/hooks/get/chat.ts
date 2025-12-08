@@ -15,6 +15,7 @@ export function useGetChats<Select = Array<Chat>>(
 		[select],
 	);
 
+	// @ts-expect-error
 	return useSuspenseQuery(options);
 }
 

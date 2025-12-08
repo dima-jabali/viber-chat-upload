@@ -1,8 +1,9 @@
 import {
+	type SingleParserBuilder,
+	type UseQueryStateReturn,
 	createParser,
 	parseAsString,
-	useQueryState,
-	type ParserBuilder,
+	useQueryState
 } from "nuqs";
 
 import type { ChatUuid } from "#/types/general";
@@ -10,7 +11,7 @@ import { useSetChatUuidToFirst } from "../use-set-chat-uuid-to-first";
 
 const CHAT_UUID_ID_KEY = "chat-uuid";
 
-const parseAsChatUuid: ParserBuilder<ChatUuid> = createParser({
+const parseAsChatUuid: SingleParserBuilder<ChatUuid> = createParser({
 	serialize: (value) => `${value}`,
 
 	parse: (value) => {
@@ -21,14 +22,14 @@ const parseAsChatUuid: ParserBuilder<ChatUuid> = createParser({
 });
 
 export const useChatUuid = () =>
-	useQueryState(
+	useQueryState<ChatUuid>(
 		CHAT_UUID_ID_KEY,
 		parseAsChatUuid.withOptions({
 			clearOnDefault: false,
 			history: "push",
 			shallow: true,
 		}),
-	);
+	) as UseQueryStateReturn<ChatUuid, undefined>;
 
 export function useWithChatUuid() {
 	const [chatUuid] = useChatUuid();
@@ -39,5 +40,5 @@ export function useWithChatUuid() {
 		throw new Error("No chat uuid");
 	}
 
-	return chatUuid;
+	return chatUuid as ChatUuid;
 }

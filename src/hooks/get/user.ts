@@ -13,5 +13,6 @@ export function useGetUser<Select = User>(select?: (data: User) => Select) {
 		[select],
 	);
 
+	// @ts-expect-error
 	return useSuspenseQuery(options).data;
 }
