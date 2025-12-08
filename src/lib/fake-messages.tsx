@@ -16,7 +16,6 @@ const BASE_URL =
 		? "http://localhost:3000/?r="
 		: "https://viber-chat-upload.vercel.app/?r=";
 
-export const MISSING_LOYALTY_CARD_USER_MESSAGE_UUID = makeMessageUuid();
 export const MISSING_LOYALTY_CARD_BOT_MESSAGE_UUID = makeMessageUuid();
 export const ID_PARSING_CONFIRMATION_MESSAGE_UUID = makeMessageUuid();
 export const LOAN_AGREEMENT_CONSENT_MESSAGE_UUID = makeMessageUuid();
@@ -28,9 +27,12 @@ export const USER_UPLOAD_ID_MESSAGE_UUID_FIRST = makeMessageUuid();
 export const UPLOAD_LOYALTY_CARD_MESSAGE_UUID = makeMessageUuid();
 export const COLLECT_BANK_INFO_MESSAGE_UUID = makeMessageUuid();
 export const SEND_BANK_INFO_MESSAGE_UUID = makeMessageUuid();
+export const LIVENESS_CHECK_MESSAGE_UUID = makeMessageUuid();
 export const BOT_UPLOAD_ID_MESSAGE_UUID = makeMessageUuid();
 export const CORRECT_NAME_MESSAGE_UUID = makeMessageUuid();
 export const BLURRY_ID_MESSAGE_UUID = makeMessageUuid();
+export const LIVE_CHECK_DONE_UUID = makeMessageUuid();
+export const LIVE_CHECK_UUID = makeMessageUuid();
 
 function handleMakeLink(url: Route) {
 	const link = `${BASE_URL}${encodeURI(url)}`;
@@ -72,7 +74,7 @@ export const ALL_MESSAGES: Record<MessageUuid, Message> = {
 	[ID_PARSING_CONFIRMATION_MESSAGE_UUID]: {
 		actions: [
 			{
-				nextMessageUuid: ID_VERIFICATION_MATCH_MESSAGE_UUID,
+				nextMessageUuid: LIVENESS_CHECK_MESSAGE_UUID,
 				uuid: makeActionUuid(),
 				text: "Yes, it is",
 			},
@@ -82,7 +84,7 @@ export const ALL_MESSAGES: Record<MessageUuid, Message> = {
 				text: "No, edit",
 			},
 		],
-		text: "📄 Got it! I see:\n\n\t• Name: Juan Dela Cruz\n\t• DOB: 05/15/1990\n\t• Address: 123 Mabini St., Manila\n\nIs this correct?",
+		text: "📄 Got it! I see:\n\n\t• Name: Juan Dela Cruz\n\t• DOB: 01/01/1990\n\t• Address: 833 SISA ST., BRGY 526, ZONE 52 SAMPALOK, MANILA CITY, METRO MANILA\n\nIs this correct?",
 		uuid: ID_PARSING_CONFIRMATION_MESSAGE_UUID,
 		createdAt: makeISODateString(),
 		type: MessageType.BUTTONS,
@@ -95,19 +97,40 @@ export const ALL_MESSAGES: Record<MessageUuid, Message> = {
 		type: MessageType.TEXT,
 		createdBy: botUser,
 	},
-	[ID_VERIFICATION_MATCH_MESSAGE_UUID]: {
-		text: "Verifying your details…\n\n✅ Great news, Juan! You're pre-approved for ₱50,000 at 1.5% monthly, payable in 12 months.\n\nPlease upload a photo of your PartnerMart loyalty card if you have it with you:",
-		uuid: ID_VERIFICATION_MATCH_MESSAGE_UUID,
+	[LIVENESS_CHECK_MESSAGE_UUID]: {
+		actions: [
+			{
+				nextMessageUuid: LIVE_CHECK_UUID,
+				text: "Start liveness check",
+				uuid: makeActionUuid(),
+			},
+		],
+		text: "We need to do a liveness check to ensure that you are who you say you are.",
+		uuid: LIVENESS_CHECK_MESSAGE_UUID,
+		createdAt: makeISODateString(),
+		type: MessageType.BUTTONS,
+		createdBy: botUser,
+	},
+	[LIVE_CHECK_UUID]: {
+		text: "Performing liveness check…",
+		uuid: LIVE_CHECK_UUID,
 		createdAt: makeISODateString(),
 		type: MessageType.TEXT,
 		createdBy: botUser,
 	},
-	[MISSING_LOYALTY_CARD_USER_MESSAGE_UUID]: {
-		uuid: MISSING_LOYALTY_CARD_USER_MESSAGE_UUID,
-		text: "I don't have it with me.",
+	[LIVE_CHECK_DONE_UUID]: {
+		text: "Liveness check successful!",
+		uuid: LIVE_CHECK_DONE_UUID,
 		createdAt: makeISODateString(),
 		type: MessageType.TEXT,
-		createdBy: user,
+		createdBy: botUser,
+	},
+	[ID_VERIFICATION_MATCH_MESSAGE_UUID]: {
+		text: "Verifying your details…\n\n✅ Great news, Juan! You're pre-approved for ₱50,000 at 1.5% monthly, payable in 12 months.\n\nPlease upload a photo of your PartnerMart loyalty card if you have it with you.",
+		uuid: ID_VERIFICATION_MATCH_MESSAGE_UUID,
+		createdAt: makeISODateString(),
+		type: MessageType.TEXT,
+		createdBy: botUser,
 	},
 	[MISSING_LOYALTY_CARD_BOT_MESSAGE_UUID]: {
 		text: "No problem! Please enter your loyalty ID number or mobile number registered with PartnerMart.",
@@ -201,32 +224,38 @@ Here's a quick summary of the key points:
 
 export const CONVERSATION_FLOW = {
 	[BOT_UPLOAD_ID_MESSAGE_UUID]: {
-		userResponse: USER_UPLOAD_ID_MESSAGE_UUID_FIRST,
 		botResponse: BLURRY_ID_MESSAGE_UUID,
 		delay: 1500,
 	},
 	[BLURRY_ID_MESSAGE_UUID]: {
-		userResponse: USER_UPLOAD_ID_MESSAGE_UUID_SECOND,
 		botResponse: ID_PARSING_CONFIRMATION_MESSAGE_UUID,
 		delay: 1500,
 	},
 	[CORRECT_NAME_MESSAGE_UUID]: {
-		userResponse: "text-input",
-		botResponse: ID_PARSING_CONFIRMATION_MESSAGE_UUID,
+		botResponse: LIVENESS_CHECK_MESSAGE_UUID,
+		delay: 1500,
+	},
+	[LIVENESS_CHECK_MESSAGE_UUID]: {
+		botResponse: LIVE_CHECK_UUID,
+		delay: 1500,
+	},
+	[LIVE_CHECK_UUID]: {
+		botResponse: LIVE_CHECK_DONE_UUID,
+		delay: 1500,
+	},
+	[LIVE_CHECK_DONE_UUID]: {
+		botResponse: ID_VERIFICATION_MATCH_MESSAGE_UUID,
 		delay: 1500,
 	},
 	[ID_VERIFICATION_MATCH_MESSAGE_UUID]: {
-		userResponse: MISSING_LOYALTY_CARD_USER_MESSAGE_UUID,
 		botResponse: MISSING_LOYALTY_CARD_BOT_MESSAGE_UUID,
 		delay: 1500,
 	},
 	[MISSING_LOYALTY_CARD_BOT_MESSAGE_UUID]: {
-		userResponse: "text-input-loyalty-card",
 		botResponse: COLLECT_BANK_INFO_MESSAGE_UUID,
 		delay: 1500,
 	},
 	[COLLECT_BANK_INFO_MESSAGE_UUID]: {
-		userResponse: SEND_BANK_INFO_MESSAGE_UUID,
 		botResponse: CONFIRM_BANK_INFO_BOT_MESSAGE_UUID,
 		delay: 1500,
 	},

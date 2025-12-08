@@ -12,12 +12,14 @@ import { useGlobalStore } from "#/contexts/global-store";
 import { useChat } from "#/hooks/get/chat";
 import { useWithChatUuid } from "#/hooks/url/use-chat-uuid";
 import { api } from "#/lib/api";
+import { useLivenessStore } from "#/contexts/liveness-store";
 
 export function ChatApp() {
 	const globalStore = useGlobalStore();
 
 	async function handleResetChat() {
 		globalStore.getState().setChats(await api.get.chats());
+		useLivenessStore.setState(useLivenessStore.getInitialState());
 	}
 
 	return (

@@ -4,6 +4,9 @@ import { useWithChatUuid } from "#/hooks/url/use-chat-uuid";
 import { useRef } from "react";
 import { AutoScrollIfOnBottom } from "./AutoScrollIfOnBottom";
 import { MessageItem } from "./message/message-item";
+import { LIVE_CHECK_UUID } from "#/lib/fake-messages";
+import { CameraView } from "./CameraView";
+import { CommandOverlay } from "./command-overlay";
 
 export function Messages() {
 	const chatUuid = useWithChatUuid();
@@ -13,6 +16,10 @@ export function Messages() {
 	const scrollRef = useRef<HTMLDivElement>(null);
 
 	globalStore.setState({ chatListRef: scrollRef });
+
+	const latestMessage = messages?.[messages.length - 1];
+
+	console.log({latestMessage, messages})
 
 	return (
 		<div
@@ -29,6 +36,13 @@ export function Messages() {
 					index={index}
 				/>
 			))}
+
+{latestMessage && latestMessage.uuid === LIVE_CHECK_UUID ?
+<div className="relative">
+            <CameraView />
+            <CommandOverlay />
+          </div>
+: null}
 		</div>
 	);
 }

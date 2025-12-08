@@ -8,14 +8,16 @@ import {
 import { useMessages } from "#/hooks/get/chat";
 import { useGetUser } from "#/hooks/get/user";
 import { useWithChatUuid } from "#/hooks/url/use-chat-uuid";
-import { Input } from "./ui/input";
 import { ALL_MESSAGES, CONVERSATION_FLOW } from "#/lib/fake-messages";
 import {
+	type FileToUpload,
+	type Message,
+	MessageType,
+	makeFileUuid,
 	makeISODateString,
 	makeMessageUuid,
-	MessageType,
-	type MessageUuid,
 } from "#/types/general";
+import { Input } from "./ui/input";
 
 export function MessageInput() {
 	const forceRenderMessageInput = useForceRenderMessageInput();
@@ -29,6 +31,7 @@ export function MessageInput_() {
 	const globalStore = useGlobalStore();
 	const user = useGetUser();
 
+	const fileInputRef = useRef<HTMLInputElement>(null);
 	const inputRef = useRef("");
 
 	function handleOnValueChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -41,9 +44,10 @@ export function MessageInput_() {
 		}
 	}
 
-	function handleSend() {
-		const { addMessageToChat } = globalStore.getState();
-		const lastMessage = messages?.at(-1);
+	function sendNextBotMsg() {
+		const { addMessageToChat, getChatMessages } = globalStore.getState();
+		const msgs = getChatMessages(chatUuid);
+		const lastMessage = getChatMessages(chatUuid)?.at(-1);
 
 		console.log({
 			lastMessage,
@@ -53,84 +57,61 @@ export function MessageInput_() {
 			ALL_MESSAGES,
 		});
 
-		if (lastMessage && CONVERSATION_FLOW[lastMessage.uuid]) {
-			const flow = CONVERSATION_FLOW[lastMessage.uuid];
+		addMessageToChat(chatUuid, {
+			createdAt: makeISODateString(),
+			uuid: makeMessageUuid(),
+			type: MessageType.TEXT,
+			text: inputRef.current,
+			createdBy: user,
+		});
 
-			if (!flow) {
-				console.error("No flow found for message:", {
-					CONVERSATION_FLOW,
-					lastMessage,
-				});
+		if (msgs) {
+			for (let i = msgs?.length - 1; i >= 0; i--) {
+				const msg = msgs[i];
 
-				return;
-			}
+				if (!msg) continue;
 
-			let userMessageText = "";
+				const flow = CONVERSATION_FLOW[msg.uuid];
 
-			if (flow.userResponse === "text-input") {
-				userMessageText = inputRef.current;
-			} else if (flow.userResponse === "text-input-loyalty-card") {
-				userMessageText = "1234567890"; // Mocking the loyalty card number
-			} else if (flow.userResponse) {
-				// Find the full message object from our mock database
-				const userMsg = ALL_MESSAGES[flow.userResponse as MessageUuid];
-
-				if (userMsg) {
-					addMessageToChat(chatUuid, {
-						...userMsg,
-						createdAt: makeISODateString(),
+				if (!flow) {
+					console.log("No flow found for message:", {
+						CONVERSATION_FLOW,
+						msg,
 					});
-				} else {
-					console.error("User message not found:", {
-						ALL_MESSAGES,
-						flow,
-					});
+
+					continue;
 				}
-			}
 
-			// Add user-typed message if it's a 'text-input' flow
-			if (userMessageText) {
-				addMessageToChat(chatUuid, {
-					createdAt: makeISODateString(),
-					uuid: makeMessageUuid(),
-					type: MessageType.TEXT,
-					text: userMessageText,
-					createdBy: user,
-				});
-			}
-
-			// Add the bot's response after a delay
-			if (flow.botResponse) {
-				setTimeout(() => {
+				if (flow.botResponse) {
 					const botMsg = ALL_MESSAGES[flow.botResponse];
 
 					if (botMsg) {
-						addMessageToChat(chatUuid, {
-							...botMsg,
-							createdAt: makeISODateString(),
-						});
+						setTimeout(() => {
+							addMessageToChat(chatUuid, {
+								...botMsg,
+								createdAt: makeISODateString(),
+							});
+						}, flow.delay);
 					} else {
 						console.error("Bot message not found:", { flow, ALL_MESSAGES });
 					}
-				}, flow.delay);
+				}
+
+				break;
 			}
+		}
+	}
+
+	function handleSend(msg?: Message) {
+		if (!inputRef.current) return;
+
+		const { addMessageToChat } = globalStore.getState();
+
+		if (msg) {
+			addMessageToChat(chatUuid, msg);
+			sendNextBotMsg();
 		} else {
-			// Default case: just send the user's message
-			const text = inputRef.current;
-
-			if (!text) {
-				console.log("No text. Not sending.");
-
-				return;
-			}
-
-			addMessageToChat(chatUuid, {
-				createdAt: makeISODateString(),
-				uuid: makeMessageUuid(),
-				type: MessageType.TEXT,
-				createdBy: user,
-				text,
-			});
+			sendNextBotMsg();
 		}
 	}
 
@@ -163,13 +144,61 @@ export function MessageInput_() {
 		};
 	}, []);
 
+	function handleSelectFile() {
+		fileInputRef.current?.click();
+	}
+
+	function handleSendFile() {
+		const file = fileInputRef.current?.files?.[0];
+
+		if (!file) {
+			return;
+		}
+
+		const reader = new FileReader();
+
+		reader.onload = () => {
+			const image = reader.result as string;
+
+			const fileToUpload: FileToUpload = {
+				uuid: makeFileUuid(),
+				base64: image,
+			};
+
+			handleSend({
+				createdAt: makeISODateString(),
+				type: MessageType.UPLOAD_FILES,
+				uuid: makeMessageUuid(),
+				text: inputRef.current,
+				files: [fileToUpload],
+				createdBy: user,
+			});
+
+			if (fileInputRef.current) {
+				fileInputRef.current.value = "";
+			}
+		};
+
+		reader.readAsDataURL(file);
+	}
+
 	return (
 		<div className="flex items-center gap-2 p-2 border-t border-border">
 			<button
 				className="flex items-center justify-center aspect-square size-6 button-hover"
+				onClick={handleSelectFile}
 				type="button"
 			>
 				<Plus className="size-5 stroke-muted-foreground" />
+
+				<input
+					type="file"
+					hidden
+					accept="image/*"
+					multiple={false}
+					ref={fileInputRef}
+					onChange={handleSendFile}
+				/>
 			</button>
 
 			<Input
@@ -181,7 +210,7 @@ export function MessageInput_() {
 
 			<button
 				className="flex items-center rounded-full justify-center aspect-square size-8 bg-accent button-hover"
-				onClick={handleSend}
+				onClick={() => handleSend()}
 				type="button"
 			>
 				<SendHorizonal className="size-4 stroke-white stroke-1" />

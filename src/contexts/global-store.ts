@@ -22,6 +22,7 @@ type GlobalContextType = {
 		newNotebook: Updater<Array<Chat> | undefined, Array<Chat> | undefined>,
 	): void;
 
+	getChatMessages(chatUuid: ChatUuid): Array<Message> | undefined;
 	addMessageToChat(chatUuid: ChatUuid, message: Message): void;
 
 	handleGoBack(): void;
@@ -45,6 +46,15 @@ export const {
 			// biome-ignore lint/style/noNonNullAssertion: this will be set first thing in the app:
 			queryClient: null!,
 
+			getChatMessages(chatUuid) {
+				const chats = get().queryClient.getQueryData<Chat[]>(
+					queryKeyFactory.get.chats.queryKey,
+				);
+
+				if (!chats) return undefined;
+
+				return chats.find((chat) => chat.uuid === chatUuid)?.messages;
+			},
 			getChats() {
 				return get().queryClient.getQueryData(
 					queryKeyFactory.get.chats.queryKey,
