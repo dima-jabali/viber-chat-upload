@@ -103,7 +103,7 @@ export function MessageInput_() {
 	}
 
 	function handleSend(msg?: Message) {
-		if (!inputRef.current) return;
+		if (!inputRef.current && !msg) return;
 
 		const { addMessageToChat } = globalStore.getState();
 
