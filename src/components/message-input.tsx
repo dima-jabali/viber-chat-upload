@@ -57,13 +57,15 @@ export function MessageInput_() {
 			ALL_MESSAGES,
 		});
 
-		addMessageToChat(chatUuid, {
-			createdAt: makeISODateString(),
-			uuid: makeMessageUuid(),
-			type: MessageType.TEXT,
-			text: inputRef.current,
-			createdBy: user,
-		});
+		if (inputRef.current) {
+			addMessageToChat(chatUuid, {
+				createdAt: makeISODateString(),
+				uuid: makeMessageUuid(),
+				type: MessageType.TEXT,
+				text: inputRef.current,
+				createdBy: user,
+			});
+		}
 
 		if (msgs) {
 			for (let i = msgs?.length - 1; i >= 0; i--) {
