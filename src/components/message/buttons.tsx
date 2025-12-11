@@ -2,8 +2,7 @@ import { useState } from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "#/components/ui/avatar";
 import { Button } from "#/components/ui/button";
-import type { GlobalStoreType } from "#/contexts/global-store";
-import { useChatUuid } from "#/hooks/url/use-chat-uuid";
+import { useChatUuid, type GlobalStoreType } from "#/contexts/global-store";
 import { ALL_MESSAGES } from "#/lib/fake-messages";
 import { cn, shortDateFormatter } from "#/lib/utils";
 import { type Action, type Message, makeISODateString } from "#/types/general";
@@ -18,7 +17,7 @@ export function ButtonsMessage({
 	index: number;
 }) {
 	const [actionDone, setActionDone] = useState<Action | undefined>(undefined);
-	const [chatUuid] = useChatUuid();
+	const chatUuid = useChatUuid();
 
 	if (!chatUuid) {
 		return null;

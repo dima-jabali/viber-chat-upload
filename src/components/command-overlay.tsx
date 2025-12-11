@@ -2,17 +2,16 @@
 
 import { useEffect } from "react";
 
-import { useGlobalStore } from "#/contexts/global-store";
+import { useGlobalStore, useWithChatUuid } from "#/contexts/global-store";
 import { useLivenessStore } from "#/contexts/liveness-store";
-import { useWithChatUuid } from "#/hooks/url/use-chat-uuid";
 import { ALL_MESSAGES, CONVERSATION_FLOW } from "#/lib/fake-messages";
 import { makeISODateString } from "#/types/general";
 
 export function CommandOverlay() {
 	const { phase, currentCommandIndex, commands, nextCommand, setPhase } =
 		useLivenessStore();
-	const chatUuid = useWithChatUuid();
 	const globalStore = useGlobalStore();
+	const chatUuid = useWithChatUuid();
 
 	useEffect(() => {
 		if (phase !== "commands") return;
@@ -41,7 +40,6 @@ export function CommandOverlay() {
 							...botMsg,
 							createdAt: makeISODateString(),
 						});
-
 					} else {
 						console.error("Bot message not found:", { flow, ALL_MESSAGES });
 					}
@@ -63,8 +61,6 @@ export function CommandOverlay() {
 
 		return () => clearTimeout(timer);
 	}, [phase, currentCommandIndex, commands.length, nextCommand, setPhase]);
-
-	// if (phase !== "commands") return null
 
 	return (
 		<div className="absolute bottom-3 left-0 right-0 flex flex-col items-center pointer-events-none text-accent text-center">

@@ -5,6 +5,8 @@ import { queryKeyFactory } from "#/hooks/query-keys";
 import { noop } from "#/lib/utils";
 import type { Chat, ChatUuid, Message, UserUuid } from "#/types/general";
 import { createZustandProvider } from "./create-zustand-provider";
+import { Route } from "#/lib/enums";
+import { useSetChatUuidToFirst } from "#/hooks/use-set-chat-uuid-to-first";
 
 type GlobalContextType = {
 	invertedIconColor: "white" | "black";
@@ -14,6 +16,9 @@ type GlobalContextType = {
 	chatListRef: React.RefObject<HTMLDivElement | null>;
 	forceRenderMessageInput: boolean;
 	userUuid: UserUuid | null;
+
+	chatUuid: ChatUuid | null;
+	route: Route;
 
 	queryClient: QueryClient;
 
@@ -42,6 +47,9 @@ export const {
 			chatListRef: { current: null },
 			forceRenderMessageInput: true,
 			userUuid: null,
+
+			route: Route.ChatApp,
+			chatUuid: null,
 
 			// biome-ignore lint/style/noNonNullAssertion: this will be set first thing in the app:
 			queryClient: null!,
@@ -137,3 +145,23 @@ export const useIsFromUser = (userUuid: UserUuid) => {
 
 	return useSelectGlobalStore(selectIsFromUser);
 };
+
+export function useRoute() {
+	return useSelectGlobalStore((state) => state.route);
+}
+
+export function useChatUuid() {
+	return useSelectGlobalStore((state) => state.chatUuid);
+}
+
+export function useWithChatUuid() {
+	const chatUuid = useChatUuid();
+
+	useSetChatUuidToFirst();
+
+	if (!chatUuid) {
+		throw new Error("No chat uuid");
+	}
+
+	return chatUuid as ChatUuid;
+}

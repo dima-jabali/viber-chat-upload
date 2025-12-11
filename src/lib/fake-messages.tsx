@@ -1,3 +1,4 @@
+import { useChatUuid, useGlobalStore } from "#/contexts/global-store";
 import {
 	type Message,
 	MessageType,
@@ -38,6 +39,64 @@ function handleMakeLink(url: Route) {
 	const link = `${BASE_URL}${encodeURI(url)}`;
 
 	return link;
+}
+
+function LinkForLivenessCheck() {
+	const globalStore = useGlobalStore();
+	const chatUuid = useChatUuid();
+
+	function handleClick() {
+		function sendNextBotMsg() {
+			if (!chatUuid) return;
+
+			const { addMessageToChat, getChatMessages } = globalStore.getState();
+			const lastMessage = getChatMessages(chatUuid)?.at(-1);
+
+			if (lastMessage && CONVERSATION_FLOW[lastMessage.uuid]) {
+				const flow = CONVERSATION_FLOW[lastMessage.uuid];
+
+				if (!flow) {
+					console.error("No flow found for message:", {
+						CONVERSATION_FLOW,
+						lastMessage,
+					});
+
+					return;
+				}
+
+				if (flow.botResponse) {
+					const botMsg = ALL_MESSAGES[flow.botResponse];
+
+					if (botMsg) {
+						addMessageToChat(chatUuid, {
+							...botMsg,
+							createdAt: makeISODateString(),
+						});
+					} else {
+						console.error("Bot message not found:", { flow, ALL_MESSAGES });
+					}
+				}
+			}
+		}
+
+		setTimeout(() => {
+			sendNextBotMsg();
+
+			setTimeout(sendNextBotMsg, 1_500);
+		}, 3000);
+	}
+
+	return (
+		<a
+			href={handleMakeLink(Route.LivenessCheck)}
+			className="underline link font-bold"
+			rel="noopener noreferrer"
+			onClick={handleClick}
+			target="_blank"
+		>
+			Start liveness check
+		</a>
+	);
 }
 
 export const ALL_MESSAGES: Record<MessageUuid, Message> = {
@@ -101,7 +160,7 @@ export const ALL_MESSAGES: Record<MessageUuid, Message> = {
 		actions: [
 			{
 				nextMessageUuid: LIVE_CHECK_UUID,
-				text: "Start liveness check",
+				text: <LinkForLivenessCheck />,
 				uuid: makeActionUuid(),
 			},
 		],

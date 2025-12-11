@@ -4,10 +4,10 @@ import { useEffect, useRef } from "react";
 import {
 	useForceRenderMessageInput,
 	useGlobalStore,
+	useWithChatUuid,
 } from "#/contexts/global-store";
 import { useMessages } from "#/hooks/get/chat";
 import { useGetUser } from "#/hooks/get/user";
-import { useWithChatUuid } from "#/hooks/url/use-chat-uuid";
 import { ALL_MESSAGES, CONVERSATION_FLOW } from "#/lib/fake-messages";
 import {
 	type FileToUpload,

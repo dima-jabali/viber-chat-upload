@@ -1,10 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { useGetChats } from "./get/chat";
-import { useChatUuid } from "./url/use-chat-uuid";
+import { useChatUuid, useGlobalStore } from "#/contexts/global-store";
 
 export function useSetChatUuidToFirst() {
-	const [chatUuid, setChatUuid] = useChatUuid();
+	const globalStore = useGlobalStore();
+	const chatUuid = useChatUuid();
 	const chats = useGetChats();
 
 	// console.log({ chatUuid, chats, enabled: chats.data.length > 0 && chatUuid === null });
@@ -15,7 +16,7 @@ export function useSetChatUuidToFirst() {
 		queryFn: async () => {
 			console.log("Setting chat uuid to first", { chats: chats.data });
 
-			await setChatUuid(chats.data[0]?.uuid ?? null);
+			globalStore.setState({chatUuid:chats.data[0]?.uuid ?? null});
 
 			return null;
 		},

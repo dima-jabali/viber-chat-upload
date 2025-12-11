@@ -21,8 +21,8 @@ export enum MessageType {
 
 export type Action = {
 	nextMessageUuid: MessageUuid;
+	text: React.ReactNode;
 	uuid: ActionUuid;
-	text: string;
 };
 
 export type FileToUpload = {

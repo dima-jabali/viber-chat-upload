@@ -8,9 +8,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "#/components/ui/avatar";
 import { Separator } from "#/components/ui/separator";
 import { SidebarInset, SidebarProvider } from "#/components/ui/sidebar";
 import { WithChatUuid } from "#/components/with-chat-uuid";
-import { useGlobalStore } from "#/contexts/global-store";
+import { useGlobalStore, useWithChatUuid } from "#/contexts/global-store";
 import { useChat } from "#/hooks/get/chat";
-import { useWithChatUuid } from "#/hooks/url/use-chat-uuid";
 import { api } from "#/lib/api";
 import { useLivenessStore } from "#/contexts/liveness-store";
 
